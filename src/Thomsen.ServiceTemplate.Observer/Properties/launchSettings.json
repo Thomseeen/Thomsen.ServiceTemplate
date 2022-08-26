@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Thomsen.ServiceTemplate.Observer": {
+      "commandName": "Project",
+      "commandLineArgs": "-n \"Thomsen ServiceTemplate\" -e \"./Service.exe\" -l \"./Log/Service.log\""
+    }
+  }
+}

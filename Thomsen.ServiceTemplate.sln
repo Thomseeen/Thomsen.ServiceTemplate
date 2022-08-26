@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32819.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thomsen.ServiceTemplate.Service", "src\Thomsen.ServiceTemplate.Service\Thomsen.ServiceTemplate.Service.csproj", "{DA5B093E-2EB1-4D91-89B3-5A5A4338976E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3036CC7F-D7D6-4461-AF1B-78964CB98699}"
+	ProjectSection(SolutionItems) = preProject
+		build\cleanup.py = build\cleanup.py
+		build\install_service.ps1 = build\install_service.ps1
+		build\uninstall_service.ps1 = build\uninstall_service.ps1
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thomsen.ServiceTemplate.Observer", "src\Thomsen.ServiceTemplate.Observer\Thomsen.ServiceTemplate.Observer.csproj", "{545D10FD-48F3-4CBE-B7A5-8DAA6F6BB98D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA5B093E-2EB1-4D91-89B3-5A5A4338976E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA5B093E-2EB1-4D91-89B3-5A5A4338976E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA5B093E-2EB1-4D91-89B3-5A5A4338976E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA5B093E-2EB1-4D91-89B3-5A5A4338976E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{545D10FD-48F3-4CBE-B7A5-8DAA6F6BB98D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{545D10FD-48F3-4CBE-B7A5-8DAA6F6BB98D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{545D10FD-48F3-4CBE-B7A5-8DAA6F6BB98D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{545D10FD-48F3-4CBE-B7A5-8DAA6F6BB98D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {23D86BE8-7DCD-4655-B416-56C1D2BC2185}
+	EndGlobalSection
+EndGlobal

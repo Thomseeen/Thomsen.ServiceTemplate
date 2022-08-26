@@ -1,0 +1,12 @@
+<Project>
+    <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+        <BaseOutputPath>..\..\bin\lib\</BaseOutputPath>
+        <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+        <EnableNETAnalyzers>True</EnableNETAnalyzers>
+        <Authors>Thomas Wagner</Authors>
+        <Company>Thomas Wagner</Company>
+        <Copyright>Copyright © 2022</Copyright>
+        <RepositoryUrl>https://github.com/Thomseeen/Thomsen.ServiceTemplate</RepositoryUrl>
+    </PropertyGroup>
+</Project>

@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
+        <OutputType>WinExe</OutputType>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <PlatformTarget>x64</PlatformTarget>
+        <UseWPF>true</UseWPF>
+        <AssemblyName>Observer</AssemblyName>
+        <BaseOutputPath>..\..\bin\Service\</BaseOutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="Resources\CleanData.png" />
+      <None Remove="Resources\Install.png" />
+      <None Remove="Resources\Play.png" />
+      <None Remove="Resources\Refresh.png" />
+      <None Remove="Resources\Restart.png" />
+      <None Remove="Resources\Stop.png" />
+      <None Remove="Resources\Uninstall.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Resource Include="Resources\CleanData.png" />
+      <Resource Include="Resources\Install.png" />
+      <Resource Include="Resources\Play.png" />
+      <Resource Include="Resources\Refresh.png" />
+      <Resource Include="Resources\Restart.png" />
+      <Resource Include="Resources\Stop.png" />
+      <Resource Include="Resources\Uninstall.png" />
+    </ItemGroup>
+
+</Project>
