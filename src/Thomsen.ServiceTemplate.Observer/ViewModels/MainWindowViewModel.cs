@@ -101,6 +101,10 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
 
     public ObservableCollection<LogLine> LogText { get => _logText; set => SetProperty(ref _logText, value); }
 
+    public string Test => Process.GetCurrentProcess().MainModule!.ModuleName!;
+
+    public string Test2 => AppContext.BaseDirectory;
+
     public MainWindowViewModel(ServiceObserverSettings settings) {
         WindowsPrincipal wp = new(WindowsIdentity.GetCurrent());
         IsAdminMode = wp.IsInRole(WindowsBuiltInRole.Administrator);
@@ -262,7 +266,7 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
             Process.Start(new ProcessStartInfo() {
                 UseShellExecute = true,
                 WorkingDirectory = Environment.CurrentDirectory,
-                FileName = Assembly.GetExecutingAssembly()!.Location.Replace("dll", "exe"),
+                FileName = Process.GetCurrentProcess().MainModule!.FileName!,
                 Arguments = string.Join(" ", Settings.ToArgs()),
                 Verb = "runas",
             });

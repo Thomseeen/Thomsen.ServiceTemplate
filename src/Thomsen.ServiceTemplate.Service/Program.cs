@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Logging.EventLog;
 
+using System.Diagnostics;
 using System.Reflection;
 
 using Thomsen.ServiceTemplate.Service.Logger;
@@ -23,7 +24,7 @@ public class Program {
 
                 // Custom file logging
                 logging.AddFileLogger(conf => {
-                    conf.LogFileDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!, "Log");
+                    conf.LogFileDirectory = Path.Combine(AppContext.BaseDirectory, "Log");
                 });
 
                 // Workaround for bug in logging to event log, see: https://github.com/dotnet/runtime/issues/47303

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -44,7 +45,8 @@ namespace Thomsen.ServiceTemplate.Service.Logger {
         private static string RefreshPath(FileLoggerConfiguration conf) {
             Directory.CreateDirectory(conf.LogFileDirectory);
 
-            string currentLogFilePath = Path.Combine(conf.LogFileDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.log");
+            string fileName = Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule!.ModuleName!);
+            string currentLogFilePath = Path.Combine(conf.LogFileDirectory, $"{fileName}.log");
 
             // No log file yet, nothing to be done
             if (!File.Exists(currentLogFilePath)) {
