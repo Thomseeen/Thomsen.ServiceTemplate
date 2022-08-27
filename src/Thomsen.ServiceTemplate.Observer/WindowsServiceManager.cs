@@ -19,11 +19,11 @@ internal enum ServiceState {
 internal static class WindowsServiceManager {
 
     public static async Task InstallServiceAsync(string serviceName, string serviceBinaryPath) {
-        await RunProcessAndThrowOnFailureAsync($"create \"{serviceName}\" binpath=\"{serviceBinaryPath}\"");
+        await RunScProcessAsync($"create \"{serviceName}\" binpath=\"{serviceBinaryPath}\"");
     }
 
     public static async Task UninstallServiceAsync(string serviceName) {
-        await RunProcessAndThrowOnFailureAsync($"delete \"{serviceName}\"");
+        await RunScProcessAsync($"delete \"{serviceName}\"");
     }
 
     public static async Task<ServiceState> StartServiceAsync(string serviceName) {
@@ -44,7 +44,7 @@ internal static class WindowsServiceManager {
         return await ParseStateAsync(result);
     }
 
-    private static async Task RunProcessAndThrowOnFailureAsync(string arguments) {
+    private static async Task RunScProcessAsync(string arguments) {
         _ = await RunProcessAsync("sc.exe", arguments);
     }
 
