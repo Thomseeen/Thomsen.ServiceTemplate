@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,58 +16,39 @@ internal enum ServiceState {
     Running
 }
 
-internal class WindowsServiceManager {
+internal static class WindowsServiceManager {
 
     public static async Task InstallServiceAsync(string serviceName, string serviceBinaryPath) {
-        await RunScProcessAndThrowIfNotSuccessFromStandardOutputAsync($"create \"{serviceName}\" binpath=\"{serviceBinaryPath}\"");
+        await RunProcessAndThrowOnFailureAsync($"create \"{serviceName}\" binpath=\"{serviceBinaryPath}\"");
     }
 
     public static async Task UninstallServiceAsync(string serviceName) {
-        await RunScProcessAndThrowIfNotSuccessFromStandardOutputAsync($"delete \"{serviceName}\"");
+        await RunProcessAndThrowOnFailureAsync($"delete \"{serviceName}\"");
     }
 
     public static async Task<ServiceState> StartServiceAsync(string serviceName) {
-        return await RunScProcessAndParseStareFromStandardOutputAsync($"start \"{serviceName}\"");
+        return await RunScProcessAndParseStateFromStandardOutputAsync($"start \"{serviceName}\"");
     }
 
     public static async Task<ServiceState> StopServiceAsync(string serviceName) {
-        return await RunScProcessAndParseStareFromStandardOutputAsync($"stop \"{serviceName}\"");
+        return await RunScProcessAndParseStateFromStandardOutputAsync($"stop \"{serviceName}\"");
     }
 
     public static async Task<ServiceState> GetServiceStateAsync(string serviceName) {
-        return await RunScProcessAndParseStareFromStandardOutputAsync($"query \"{serviceName}\"");
+        return await RunScProcessAndParseStateFromStandardOutputAsync($"query \"{serviceName}\"");
     }
 
-    private static async Task<ServiceState> RunScProcessAndParseStareFromStandardOutputAsync(string arguments) {
+    private static async Task<ServiceState> RunScProcessAndParseStateFromStandardOutputAsync(string arguments) {
         IAsyncEnumerable<string> result = RunProcessAndGetStandardOutputAsync("sc.exe", arguments);
 
-        return await ParseStateFromStandardOutputAsync(result);
+        return await ParseStateAsync(result);
     }
 
-    private static async Task RunScProcessAndThrowIfNotSuccessFromStandardOutputAsync(string arguments) {
-        IAsyncEnumerable<string> result = RunProcessAndGetStandardOutputAsync("sc.exe", arguments);
-
-        await ThrowIfNotSuccessFromStandardOutputAsync(result);
+    private static async Task RunProcessAndThrowOnFailureAsync(string arguments) {
+        _ = await RunProcessAsync("sc.exe", arguments);
     }
 
-    private static async Task ThrowIfNotSuccessFromStandardOutputAsync(IAsyncEnumerable<string> result) {
-        List<string> lines = new();
-
-        await foreach (string line in result) {
-            if (line.ToLower().Contains("success")) {
-                return;
-            }
-
-            lines.Add(line);
-        }
-
-        // Reconstruct full message for exception when parsing failed
-        throw new InvalidDataException(string.Join(Environment.NewLine, lines));
-    }
-
-    private static async Task<ServiceState> ParseStateFromStandardOutputAsync(IAsyncEnumerable<string> result) {
-        List<string> lines = new();
-
+    private static async Task<ServiceState> ParseStateAsync(IAsyncEnumerable<string> result) {
         await foreach (string line in result) {
             if (line.Contains("STATE")) {
                 string state = line.Split(' ')
@@ -78,15 +60,12 @@ internal class WindowsServiceManager {
                     "stop_pending" => ServiceState.StopPending,
                     "start_pending" => ServiceState.StartPending,
                     "running" => ServiceState.Running,
-                    _ => throw new InvalidDataException()
+                    _ => throw new InvalidOperationException()
                 };
             }
-
-            lines.Add(line);
         }
 
-        // Reconstruct full message for exception when parsing failed
-        throw new InvalidDataException(string.Join(Environment.NewLine, lines));
+        throw new InvalidOperationException("Parsing failed unexpected");
     }
 
     private static async IAsyncEnumerable<string> RunProcessAndGetStandardOutputAsync(string fileName, string arguments) {
@@ -111,6 +90,11 @@ internal class WindowsServiceManager {
         })!;
 
         await process.WaitForExitAsync();
+
+        if (process.ExitCode != 0) {
+            using StreamReader reader = process.StandardOutput;
+            throw new InvalidOperationException(await reader.ReadToEndAsync());
+        }
 
         return process;
     }

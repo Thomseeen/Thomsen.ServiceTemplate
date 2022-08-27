@@ -101,10 +101,6 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
 
     public ObservableCollection<LogLine> LogText { get => _logText; set => SetProperty(ref _logText, value); }
 
-    public string Test => Process.GetCurrentProcess().MainModule!.ModuleName!;
-
-    public string Test2 => AppContext.BaseDirectory;
-
     public MainWindowViewModel(ServiceObserverSettings settings) {
         WindowsPrincipal wp = new(WindowsIdentity.GetCurrent());
         IsAdminMode = wp.IsInRole(WindowsBuiltInRole.Administrator);
@@ -291,7 +287,7 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
                     IsServiceRunning = false;
                     break;
             }
-        } catch (InvalidDataException) {
+        } catch (InvalidOperationException) {
             IsServiceInstalled = false;
             IsServiceRunning = false;
         }

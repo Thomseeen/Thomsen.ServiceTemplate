@@ -273,9 +273,6 @@
 
             <Button Command="{Binding RestartAsAdminCmd}" Content="Restart as Admin" />
             <Button Command="{Binding ForceRefreshCmd}" Content="Force Refresh" />
-
-            <TextBox IsReadOnly="True" Text="{Binding Test, Mode=OneWay}" />
-            <TextBox IsReadOnly="True" Text="{Binding Test2, Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </Window>
