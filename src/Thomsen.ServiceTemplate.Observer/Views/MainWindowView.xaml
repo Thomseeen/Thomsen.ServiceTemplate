@@ -217,7 +217,7 @@
                     <TextBlock
                         Grid.Row="3"
                         Grid.Column="0"
-                        Text="Service Log (-l) " />
+                        Text="Service Log (-l): " />
                     <TextBox
                         Grid.Row="3"
                         Grid.Column="1"
