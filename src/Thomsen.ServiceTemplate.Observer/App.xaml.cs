@@ -20,7 +20,7 @@ public partial class App : Application {
     /// <summary>
     /// Params:
     /// -n, --name: "ServiceName"
-    /// -e, --executable: "/path/to/executable.exe"
+    /// -e, --executable: "/path/to/executable.exe -a -f"
     /// -l, --log: "/path/to/log.log"
     /// </summary>
     /// <param name="e"></param>

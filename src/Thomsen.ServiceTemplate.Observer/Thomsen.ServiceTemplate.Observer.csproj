@@ -11,26 +11,27 @@
         <UseWPF>true</UseWPF>
         <AssemblyName>Observer</AssemblyName>
         <BaseOutputPath>..\..\bin\Service\</BaseOutputPath>
+        <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="Resources\CleanData.png" />
-      <None Remove="Resources\Install.png" />
-      <None Remove="Resources\Play.png" />
-      <None Remove="Resources\Refresh.png" />
-      <None Remove="Resources\Restart.png" />
-      <None Remove="Resources\Stop.png" />
-      <None Remove="Resources\Uninstall.png" />
+        <None Remove="Resources\CleanData.png" />
+        <None Remove="Resources\Install.png" />
+        <None Remove="Resources\Play.png" />
+        <None Remove="Resources\Refresh.png" />
+        <None Remove="Resources\Restart.png" />
+        <None Remove="Resources\Stop.png" />
+        <None Remove="Resources\Uninstall.png" />
     </ItemGroup>
 
     <ItemGroup>
-      <Resource Include="Resources\CleanData.png" />
-      <Resource Include="Resources\Install.png" />
-      <Resource Include="Resources\Play.png" />
-      <Resource Include="Resources\Refresh.png" />
-      <Resource Include="Resources\Restart.png" />
-      <Resource Include="Resources\Stop.png" />
-      <Resource Include="Resources\Uninstall.png" />
+        <Resource Include="Resources\CleanData.png" />
+        <Resource Include="Resources\Install.png" />
+        <Resource Include="Resources\Play.png" />
+        <Resource Include="Resources\Refresh.png" />
+        <Resource Include="Resources\Restart.png" />
+        <Resource Include="Resources\Stop.png" />
+        <Resource Include="Resources\Uninstall.png" />
     </ItemGroup>
 
 </Project>
