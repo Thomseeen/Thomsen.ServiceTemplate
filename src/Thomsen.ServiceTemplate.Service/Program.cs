@@ -1,9 +1,6 @@
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Logging.EventLog;
 
-using System.Diagnostics;
-using System.Reflection;
-
 using Thomsen.ServiceTemplate.Service.Logger;
 
 namespace Thomsen.ServiceTemplate.Service;
