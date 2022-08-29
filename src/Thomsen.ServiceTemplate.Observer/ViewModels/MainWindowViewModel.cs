@@ -146,6 +146,8 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
         IsObservingLog = true;
 
         try {
+            // #TODO: Use file observer or more low level logic to track changes based on changed bytes
+
             using FileStream stream = File.Open(Settings.ServiceLogPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
 
             try {
