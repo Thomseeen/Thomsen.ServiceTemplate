@@ -1,17 +1,20 @@
 ﻿using System.Windows.Input;
 
-namespace Thomsen.ServiceTemplate.Observer;
+namespace Thomsen.ServiceTemplate.Observer.Mvvm;
 
-internal class CommandHandler : ICommand {
+internal class CommandHandler : ICommand
+{
     private readonly Action<object?> _action;
     private readonly Func<bool> _canExecute;
 
-    public event EventHandler? CanExecuteChanged {
+    public event EventHandler? CanExecuteChanged
+    {
         add => CommandManager.RequerySuggested += value;
         remove => CommandManager.RequerySuggested -= value;
     }
 
-    public CommandHandler(Action<object?> action, Func<bool> canExecute) {
+    public CommandHandler(Action<object?> action, Func<bool> canExecute)
+    {
         _action = action;
         _canExecute = canExecute;
     }

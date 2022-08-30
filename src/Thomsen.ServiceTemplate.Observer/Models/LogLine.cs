@@ -1,14 +1,14 @@
 ﻿using System.Text.RegularExpressions;
 using System.Windows.Media;
 
-namespace Thomsen.ServiceTemplate.Observer.ViewModels;
+namespace Thomsen.ServiceTemplate.Observer.Models;
 
 record class LogLine {
-    public DateTime? TimeStamp { get; set; } = null;
+    public DateTime? TimeStamp { get; init; } = null;
 
-    public string Text { get; set; }
+    public string Text { get; init; }
 
-    public Brush Color { get; set; } = Brushes.Black;
+    public Brush Color { get; init; } = Brushes.Black;
 
     public LogLine(string text) {
         if (TryGetColorByLogLevel(text, out Brush color)) {

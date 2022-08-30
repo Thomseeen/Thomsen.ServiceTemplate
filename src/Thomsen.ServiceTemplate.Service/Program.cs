@@ -14,7 +14,7 @@ public class Program {
             .ConfigureServices(services => {
                 LoggerProviderOptions.RegisterProviderOptions<EventLogSettings, EventLogLoggerProvider>(services);
 
-                services.AddHostedService<WindowsBackgroundService>();
+                services.AddHostedService<BackgroundService>();
             })
             .ConfigureLogging((context, logging) => {
                 logging.ClearProviders();

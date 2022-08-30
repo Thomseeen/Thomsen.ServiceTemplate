@@ -2,13 +2,13 @@ using Thomsen.ServiceTemplate.Service.Logger;
 
 namespace Thomsen.ServiceTemplate.Service;
 
-public class WindowsBackgroundService : BackgroundService {
-    private readonly ILogger<WindowsBackgroundService> _logger;
+public class BackgroundService : Microsoft.Extensions.Hosting.BackgroundService {
+    private readonly ILogger<BackgroundService> _logger;
     private readonly IConfiguration _conf;
 
     private readonly PeriodicTimer _timer;
 
-    public WindowsBackgroundService(ILogger<WindowsBackgroundService> logger, IConfiguration conf) {
+    public BackgroundService(ILogger<BackgroundService> logger, IConfiguration conf) {
         _logger = logger;
         _conf = conf;
 

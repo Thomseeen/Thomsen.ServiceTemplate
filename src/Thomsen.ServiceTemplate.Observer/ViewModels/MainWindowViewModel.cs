@@ -7,6 +7,9 @@ using System.Security.Principal;
 using System.Windows;
 using System.Windows.Input;
 
+using Thomsen.ServiceTemplate.Observer.Models;
+using Thomsen.ServiceTemplate.Observer.Mvvm;
+
 namespace Thomsen.ServiceTemplate.Observer.ViewModels;
 
 internal class MainWindowViewModel : BaseViewModel, IDisposable {
@@ -138,8 +141,6 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
     }
 
     public async Task LoadAsync(ServiceObserverSettings? settings = null) {
-        using WaitCursor _ = new();
-
         Unload();
 
         if (settings is not null) {
@@ -369,7 +370,7 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
                     IsServiceRunning = false;
                     break;
             }
-        } catch (InvalidOperationException) {
+        } catch (WindowsServiceManagerException ex) when (ex.IsServiceNotInstalledError) {
             IsServiceInstalled = false;
             IsServiceRunning = false;
         }

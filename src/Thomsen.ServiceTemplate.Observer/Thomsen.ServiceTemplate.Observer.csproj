@@ -20,8 +20,24 @@
         <None Remove="Resources\Play.png" />
         <None Remove="Resources\Refresh.png" />
         <None Remove="Resources\Restart.png" />
+        <None Remove="Resources\StatusNotStarted.ico" />
+        <None Remove="Resources\StatusNotStarted.png" />
+        <None Remove="Resources\StatusOK.ico" />
+        <None Remove="Resources\StatusOK.png" />
+        <None Remove="Resources\StatusOKOutline.ico" />
+        <None Remove="Resources\StatusOKOutline.png" />
+        <None Remove="Resources\StatusStopped.ico" />
+        <None Remove="Resources\StatusStopped.png" />
+        <None Remove="Resources\StatusStoppedOutline.ico" />
+        <None Remove="Resources\StatusStoppedOutline.png" />
+        <None Remove="Resources\StatusWarning.ico" />
+        <None Remove="Resources\StatusWarning.png" />
         <None Remove="Resources\Stop.png" />
         <None Remove="Resources\Uninstall.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -30,14 +46,26 @@
         <Resource Include="Resources\Play.png" />
         <Resource Include="Resources\Refresh.png" />
         <Resource Include="Resources\Restart.png" />
+        <Resource Include="Resources\StatusNotStarted.ico" />
+        <Resource Include="Resources\StatusNotStarted.png" />
+        <Resource Include="Resources\StatusOK.ico" />
+        <Resource Include="Resources\StatusOK.png" />
+        <Resource Include="Resources\StatusOKOutline.ico" />
+        <Resource Include="Resources\StatusOKOutline.png" />
+        <Resource Include="Resources\StatusStopped.ico" />
+        <Resource Include="Resources\StatusStopped.png" />
+        <Resource Include="Resources\StatusStoppedOutline.ico" />
+        <Resource Include="Resources\StatusStoppedOutline.png" />
+        <Resource Include="Resources\StatusWarning.ico" />
+        <Resource Include="Resources\StatusWarning.png" />
         <Resource Include="Resources\Stop.png" />
         <Resource Include="Resources\Uninstall.png" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Services.xml">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <None Update="Services.xml">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

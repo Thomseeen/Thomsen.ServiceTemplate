@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Xml.Serialization;
 
-namespace Thomsen.ServiceTemplate.Observer;
+namespace Thomsen.ServiceTemplate.Observer.Models;
 
 public record class ServiceObserverSettings {
     [XmlAttribute]
