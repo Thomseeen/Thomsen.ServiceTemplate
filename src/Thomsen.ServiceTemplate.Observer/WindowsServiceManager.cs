@@ -87,6 +87,8 @@ internal static class WindowsServiceManager {
 
         if (process.ExitCode != 0) {
             using StreamReader reader = process.StandardOutput;
+
+            // #TODO: Handle this differently
             throw new WindowsServiceManagerException(await reader.ReadToEndAsync(), process.ExitCode);
         }
 

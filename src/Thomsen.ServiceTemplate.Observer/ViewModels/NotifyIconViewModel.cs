@@ -52,6 +52,9 @@ internal class NotifyIconViewModel : BaseViewModel {
     }
 
     private static async Task<ServiceStateEntry[]> RefreshServiceStatesAsync(ServiceObserverSettings[] settings) {
+        // #TODO: Don't always refresh full list
+        // #TODO: Handle some coloring/notify icons in the tray
+
         List<ServiceStateEntry> services = new();
 
         foreach (ServiceObserverSettings setting in settings) {
