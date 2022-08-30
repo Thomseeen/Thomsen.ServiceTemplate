@@ -45,7 +45,7 @@
             ResizeDirection="Columns" />
 
         <StackPanel Grid.Column="2">
-            <GroupBox Header="Startup Settings" IsEnabled="False">
+            <GroupBox Header="Startup Settings">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />
@@ -55,31 +55,41 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock
+                    <ComboBox
                         Grid.Row="0"
-                        Grid.Column="0"
-                        Text="Service Name (-n): " />
-                    <TextBox
-                        Grid.Row="0"
-                        Grid.Column="1"
-                        IsReadOnly="True"
-                        Text="{Binding Settings.ServiceName}" />
+                        Grid.ColumnSpan="2"
+                        ItemsSource="{Binding AvailableSettingsSets}"
+                        SelectedItem="{Binding SelectedSettings}" />
 
                     <TextBlock
                         Grid.Row="1"
                         Grid.Column="0"
+                        Text="Service Name (-n): " />
+                    <TextBox
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        IsEnabled="False"
+                        IsReadOnly="True"
+                        Text="{Binding LoadedSettings.ServiceName}" />
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
                         Text="Service Executable (-e): " />
-                    <DockPanel Grid.Row="1" Grid.Column="1">
+                    <DockPanel Grid.Row="2" Grid.Column="1">
                         <TextBox
                             DockPanel.Dock="Right"
+                            IsEnabled="False"
                             IsReadOnly="True"
-                            Text="{Binding Settings.ServiceExecutableStandaloneArgs}" />
+                            Text="{Binding LoadedSettings.ServiceExecutableStandaloneArgs}" />
                         <TextBox
                             DockPanel.Dock="Left"
+                            IsEnabled="False"
                             IsReadOnly="True"
-                            Text="{Binding Settings.ServiceExecutablePath}" />
+                            Text="{Binding LoadedSettings.ServiceExecutablePath}" />
                     </DockPanel>
 
                     <TextBlock
@@ -89,8 +99,9 @@
                     <TextBox
                         Grid.Row="3"
                         Grid.Column="1"
+                        IsEnabled="False"
                         IsReadOnly="True"
-                        Text="{Binding Settings.ServiceLogPath}" />
+                        Text="{Binding LoadedSettings.ServiceLogPath}" />
                 </Grid>
             </GroupBox>
 
@@ -107,7 +118,7 @@
                                     <DataTrigger Binding="{Binding IsServiceInstalled}" Value="False">
                                         <Setter Property="Text" Value="Not Installed" />
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding Settings.ServiceName}" Value="{x:Null}">
+                                    <DataTrigger Binding="{Binding LoadedSettings.ServiceName}" Value="{x:Null}">
                                         <Setter Property="Text" Value="Unknown" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -166,14 +177,41 @@
                         Command="{Binding ClearLogCmd}"
                         Content="Clear"
                         Style="{StaticResource Clear}" />
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Auto Scroll: " />
-                        <CheckBox IsChecked="{Binding IsLogScrollingEnabled}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Last Alive (s): " />
-                        <TextBlock Text="{Binding ObservingLogUnchangedSeconds}" />
-                    </StackPanel>
+
+                    <Separator />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            FontWeight="Bold"
+                            Text="Auto Scroll: " />
+                        <CheckBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            IsChecked="{Binding IsLogScrollingEnabled}" />
+
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            FontWeight="Bold"
+                            Text="Last Alive (s): " />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Text="{Binding ObservingLogUnchangedSeconds}" />
+                    </Grid>
                 </StackPanel>
             </GroupBox>
 

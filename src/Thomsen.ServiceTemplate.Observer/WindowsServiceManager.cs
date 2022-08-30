@@ -11,10 +11,9 @@ internal enum ServiceState {
 }
 
 internal static class WindowsServiceManager {
-
-    public static async Task InstallServiceAsync(string serviceName, string serviceBinaryPath) {
+    public static async Task InstallServiceAsync(string serviceName, string serviceBinaryPath, bool autoStart = false) {
         // #TODO: Support service settings
-        await RunScProcessAsync($"create \"{serviceName}\" binpath=\"{serviceBinaryPath}\"");
+        await RunScProcessAsync($"create \"{serviceName}\" binpath= \"{serviceBinaryPath}\"{(autoStart ? " start= auto" : "")}");
     }
 
     public static async Task UninstallServiceAsync(string serviceName) {

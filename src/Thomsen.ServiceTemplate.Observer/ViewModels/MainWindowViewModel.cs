@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -10,8 +11,11 @@ namespace Thomsen.ServiceTemplate.Observer.ViewModels;
 
 internal class MainWindowViewModel : BaseViewModel, IDisposable {
     private bool _isAdminMode = false;
+    private readonly ServiceObserverSettings[] _availableSettingsSets;
 
     private ServiceState _serviceState;
+    private ServiceObserverSettings _loadedSettings;
+    private ServiceObserverSettings _selectedSettings;
 
     private bool _isServiceInstalled = false;
     private bool _isServiceRunning = false;
@@ -39,25 +43,46 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
     private ICommand? _forceRefreshCmd;
 
     public ICommand StartServiceCmd => _startServiceCmd ??=
-        new CommandHandler(async param => await StartServiceAsync(), () => IsAdminMode && IsServiceInstalled && !IsServiceRunning && !IsStandaloneRunning && Settings.ServiceName is not null);
+        new CommandHandler(async param => await StartServiceAsync(), () =>
+            IsAdminMode &&
+            IsServiceInstalled &&
+            !IsServiceRunning &&
+            !IsStandaloneRunning &&
+            LoadedSettings.ServiceName is not null);
 
     public ICommand StopServiceCmd => _stopServiceCmd ??=
-        new CommandHandler(async param => await StopServiceAsync(), () => IsAdminMode && IsServiceInstalled && IsServiceRunning && Settings.ServiceName is not null);
+        new CommandHandler(async param => await StopServiceAsync(), () =>
+            IsAdminMode &&
+            IsServiceInstalled &&
+            IsServiceRunning &&
+            LoadedSettings.ServiceName is not null);
 
     public ICommand InstallServiceCmd => _installServiceCmd ??=
-        new CommandHandler(async param => await InstallServiceAsync(), () => IsAdminMode && !IsServiceInstalled && !IsServiceRunning && !IsStandaloneRunning && Settings.ServiceName is not null);
+        new CommandHandler(async param => await InstallServiceAsync(), () =>
+            IsAdminMode &&
+            !IsServiceInstalled &&
+            !IsServiceRunning &&
+            LoadedSettings.ServiceName is not null &&
+            LoadedSettings.ServiceExecutablePath is not null);
 
     public ICommand UninstallServiceCmd => _uninstallServiceCmd ??=
-        new CommandHandler(async param => await UninstallServiceAsync(), () => IsAdminMode && IsServiceInstalled && !IsServiceRunning && !IsStandaloneRunning && Settings.ServiceName is not null);
+        new CommandHandler(async param => await UninstallServiceAsync(), () =>
+            IsAdminMode &&
+            IsServiceInstalled &&
+            !IsServiceRunning &&
+            LoadedSettings.ServiceName is not null);
 
     public ICommand StartStandaloneCmd => _startStandaloneCmd ??=
-        new CommandHandler(param => StartStandalone(), () => !IsServiceRunning && !IsStandaloneRunning && Settings.ServiceExecutablePath is not null);
+        new CommandHandler(param => StartStandalone(), () =>
+            !IsServiceRunning &&
+            !IsStandaloneRunning &&
+            LoadedSettings.ServiceExecutablePath is not null);
 
     public ICommand StopStandaloneCmd => _stopStandaloneCmd ??=
         new CommandHandler(async param => await StopStandaloneAsync(), () => IsStandaloneRunning);
 
     public ICommand StartObservingLogCmd => _startObservingLogCmd ??=
-        new CommandHandler(param => StartObservingLog(), () => !IsObservingLog && Settings.ServiceLogPath is not null);
+        new CommandHandler(param => StartObservingLog(), () => !IsObservingLog && LoadedSettings.ServiceLogPath is not null);
 
     public ICommand StopObservingLogCmd => _stopObservingLogCmd ??=
         new CommandHandler(param => StopObservingLog(), () => IsObservingLog);
@@ -69,11 +94,15 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
         new CommandHandler(async param => await RestartAsAdminAsync(), () => !IsAdminMode);
 
     public ICommand ForceRefreshCmd => _forceRefreshCmd ??=
-        new CommandHandler(async param => await RunActionAndHandleExceptionAsync(async () => await RefreshServiceStateAsync()), () => Settings.ServiceName is not null);
+        new CommandHandler(async param => await RunActionAndHandleExceptionAsync(async () => await RefreshServiceStateAsync()), () => LoadedSettings.ServiceName is not null);
 
-    public ServiceObserverSettings Settings { get; }
+    public ServiceObserverSettings[] AvailableSettingsSets { get => _availableSettingsSets; }
 
-    public string WindowTitle => $"{nameof(Observer)}: {Settings.ServiceName ?? Path.GetFileName(Settings.ServiceLogPath)}{(IsAdminMode ? " (Administrator)" : "")}";
+    public ServiceObserverSettings LoadedSettings { get => _loadedSettings; set => SetProperty(ref _loadedSettings, value); }
+
+    public ServiceObserverSettings SelectedSettings { get => _selectedSettings; set => SetProperty(ref _selectedSettings, value); }
+
+    public string WindowTitle => $"{nameof(Observer)}: {LoadedSettings.ServiceName ?? Path.GetFileName(LoadedSettings.ServiceLogPath)}{(IsAdminMode ? " (Administrator)" : "")}";
 
     public bool IsAdminMode { get => _isAdminMode; set => SetProperty(ref _isAdminMode, value); }
 
@@ -93,27 +122,55 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
 
     public ObservableCollection<LogLine> LogText { get => _logText; set => SetProperty(ref _logText, value); }
 
-    public MainWindowViewModel(ServiceObserverSettings settings) {
+    public MainWindowViewModel(params ServiceObserverSettings[] settings) {
+        if (settings.Length == 0) {
+            throw new ArgumentException("Is empty", nameof(settings));
+        }
+
         WindowsPrincipal wp = new(WindowsIdentity.GetCurrent());
         IsAdminMode = wp.IsInRole(WindowsBuiltInRole.Administrator);
 
-        Settings = settings;
+        _availableSettingsSets = settings;
+        _selectedSettings = _availableSettingsSets.First();
+        _loadedSettings = _selectedSettings;
+
+        PropertyChanged += MainWindowViewModel_PropertyChanged;
     }
 
-    public async Task LoadAsync() {
+    public async Task LoadAsync(ServiceObserverSettings? settings = null) {
         using WaitCursor _ = new();
+
+        Unload();
+
+        if (settings is not null) {
+            LoadedSettings = settings;
+        }
 
         await RefreshServiceStateAsync();
 
         StartObservingLog();
     }
 
+    public void Unload() {
+        ForceStopStandalone();
+
+        StopObservingLog();
+
+        LogText.Clear();
+    }
+
+    private async void MainWindowViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e) {
+        if (e.PropertyName == nameof(SelectedSettings)) {
+            await LoadAsync(SelectedSettings);
+        }
+    }
+
     private void StartObservingLog() {
-        if (!File.Exists(Settings.ServiceLogPath)) {
+        if (!File.Exists(LoadedSettings.ServiceLogPath)) {
             return;
         }
 
-        if (IsObservingLog || Settings.ServiceLogPath is null) {
+        if (IsObservingLog || LoadedSettings.ServiceLogPath is null) {
             return;
         }
 
@@ -141,14 +198,14 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
     }
 
     private async Task ReadLogFileStreamAsync(CancellationToken cancellationToken) {
-        ArgumentNullException.ThrowIfNull(Settings.ServiceLogPath);
+        ArgumentNullException.ThrowIfNull(LoadedSettings.ServiceLogPath);
 
         IsObservingLog = true;
 
         try {
             // #TODO: Use file observer or more low level logic to track changes based on changed bytes
 
-            using FileStream stream = File.Open(Settings.ServiceLogPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            using FileStream stream = File.Open(LoadedSettings.ServiceLogPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
 
             try {
                 stream.Seek(-2048, SeekOrigin.End);
@@ -191,9 +248,9 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
 
     private async Task StartServiceAsync() {
         await RunActionAndHandleExceptionAsync(async () => {
-            ArgumentNullException.ThrowIfNull(Settings.ServiceName);
+            ArgumentNullException.ThrowIfNull(LoadedSettings.ServiceName);
 
-            await WindowsServiceManager.StartServiceAsync(Settings.ServiceName);
+            await WindowsServiceManager.StartServiceAsync(LoadedSettings.ServiceName);
 
             await Task.Delay(3000);
 
@@ -205,9 +262,9 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
 
     private async Task StopServiceAsync() {
         await RunActionAndHandleExceptionAsync(async () => {
-            ArgumentNullException.ThrowIfNull(Settings.ServiceName);
+            ArgumentNullException.ThrowIfNull(LoadedSettings.ServiceName);
 
-            await WindowsServiceManager.StopServiceAsync(Settings.ServiceName);
+            await WindowsServiceManager.StopServiceAsync(LoadedSettings.ServiceName);
 
             await Task.Delay(3000);
 
@@ -219,29 +276,29 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
 
     private async Task InstallServiceAsync() {
         await RunActionAndHandleExceptionAsync(async () => {
-            ArgumentNullException.ThrowIfNull(Settings.ServiceExecutablePath);
-            ArgumentNullException.ThrowIfNull(Settings.ServiceName);
+            ArgumentNullException.ThrowIfNull(LoadedSettings.ServiceExecutablePath);
+            ArgumentNullException.ThrowIfNull(LoadedSettings.ServiceName);
 
-            string executableFullPath = Path.Combine(Directory.GetCurrentDirectory(), Settings.ServiceExecutablePath);
-            await WindowsServiceManager.InstallServiceAsync(Settings.ServiceName, executableFullPath);
+            string executableFullPath = Path.Combine(Directory.GetCurrentDirectory(), LoadedSettings.ServiceExecutablePath);
+            await WindowsServiceManager.InstallServiceAsync(LoadedSettings.ServiceName, executableFullPath);
             await RefreshServiceStateAsync();
         });
     }
 
     private async Task UninstallServiceAsync() {
         await RunActionAndHandleExceptionAsync(async () => {
-            ArgumentNullException.ThrowIfNull(Settings.ServiceName);
+            ArgumentNullException.ThrowIfNull(LoadedSettings.ServiceName);
 
-            await WindowsServiceManager.UninstallServiceAsync(Settings.ServiceName);
+            await WindowsServiceManager.UninstallServiceAsync(LoadedSettings.ServiceName);
             await RefreshServiceStateAsync();
         });
     }
 
     private void StartStandalone() {
         RunActionAndHandleException(() => {
-            ArgumentNullException.ThrowIfNull(Settings.ServiceExecutablePath);
+            ArgumentNullException.ThrowIfNull(LoadedSettings.ServiceExecutablePath);
 
-            _standaloneProcess = Process.Start(Settings.ServiceExecutablePath, Settings.ServiceExecutableStandaloneArgs ?? "");
+            _standaloneProcess = Process.Start(LoadedSettings.ServiceExecutablePath, LoadedSettings.ServiceExecutableStandaloneArgs ?? "");
 
             IsStandaloneRunning = true;
 
@@ -266,6 +323,16 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
         });
     }
 
+    private void ForceStopStandalone() {
+        if (_standaloneProcess is not null) {
+            _standaloneProcess.Kill();
+            _standaloneProcess.Dispose();
+            _standaloneProcess = null;
+
+            IsStandaloneRunning = false;
+        }
+    }
+
     private async Task RestartAsAdminAsync() {
         await RunActionAndHandleExceptionAsync(async () => {
             await StopStandaloneAsync();
@@ -274,7 +341,7 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
                 UseShellExecute = true,
                 WorkingDirectory = Environment.CurrentDirectory,
                 FileName = Environment.ProcessPath!,
-                Arguments = string.Join(" ", Settings.ToArgs()),
+                Arguments = string.Join(" ", LoadedSettings.ToArgs()),
                 Verb = "runas",
             });
 
@@ -283,12 +350,12 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
     }
 
     private async Task RefreshServiceStateAsync() {
-        if (Settings.ServiceName is null) {
+        if (LoadedSettings.ServiceName is null) {
             return;
         }
 
         try {
-            ServiceState = await WindowsServiceManager.GetServiceStateAsync(Settings.ServiceName);
+            ServiceState = await WindowsServiceManager.GetServiceStateAsync(LoadedSettings.ServiceName);
 
             switch (ServiceState) {
                 case ServiceState.Running:
@@ -332,9 +399,6 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
     }
 
     public void Dispose() {
-        if (_standaloneProcess is not null) {
-            _standaloneProcess.Kill();
-            _standaloneProcess.Dispose();
-        }
+        ForceStopStandalone();
     }
 }

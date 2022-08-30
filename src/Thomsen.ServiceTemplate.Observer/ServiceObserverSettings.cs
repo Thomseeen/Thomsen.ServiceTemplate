@@ -1,13 +1,24 @@
-﻿namespace Thomsen.ServiceTemplate.Observer;
+﻿using System.IO;
+using System.Xml.Serialization;
 
-internal record class ServiceObserverSettings {
+namespace Thomsen.ServiceTemplate.Observer;
+
+public record class ServiceObserverSettings {
+    [XmlAttribute]
     public string? ServiceName { get; set; }
 
+    [XmlAttribute]
     public string? ServiceExecutablePath { get; set; }
 
+    [XmlAttribute]
     public string? ServiceExecutableStandaloneArgs { get; set; }
 
+    [XmlAttribute]
     public string? ServiceLogPath { get; set; }
+
+    public override string? ToString() {
+        return ServiceName ?? Path.GetFileName(ServiceLogPath) ?? base.ToString();
+    }
 
     internal string[] ToArgs() {
         List<string> args = new();
@@ -49,6 +60,13 @@ internal record class ServiceObserverSettings {
         return settings;
     }
 
+    internal static ServiceObserverSettings[] FromConfigFile(string filePath) {
+        XmlSerializer serializer = new(typeof(ServiceObserverSettings[]));
+        using FileStream stream = File.OpenRead(filePath);
+
+        return (ServiceObserverSettings[])(serializer.Deserialize(stream) ?? throw new InvalidOperationException("Can't deserialize"));
+    }
+
     private static string GetExecutablePathAndArgs(string path, out string? args) {
         const char separator = ' ';
 
@@ -73,5 +91,23 @@ internal record class ServiceObserverSettings {
         }
 
         return false;
+    }
+
+    public static void GenerateTestDefaultConfigFile(string filePath) {
+        ServiceObserverSettings[] settingsSets = new ServiceObserverSettings[] {
+            new ServiceObserverSettings() {
+                ServiceName = "Thomsen ServiceTemplate",
+                ServiceExecutablePath = "./Service.exe",
+                ServiceLogPath = "./Log/Service.log"
+            },
+            new ServiceObserverSettings() {
+                ServiceLogPath = "C:/MahaPA/MPAS/Bin_Test/Log/MPASPorscheReportLib.log"
+            }
+        };
+
+        XmlSerializer serializer = new(typeof(ServiceObserverSettings[]));
+        using FileStream stream = File.OpenWrite(filePath);
+
+        serializer.Serialize(stream, settingsSets);
     }
 }

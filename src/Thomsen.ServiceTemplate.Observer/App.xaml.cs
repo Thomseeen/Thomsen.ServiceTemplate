@@ -19,6 +19,11 @@ public partial class App : Application {
     /// </summary>
     /// <param name="e"></param>
 
+    private const string CONFIG_FILE_NAME = "Services.xml";
+
+    private MainWindowView? _view;
+    private MainWindowViewModel? _viewModel;
+
     protected override void OnStartup(StartupEventArgs e) {
         base.OnStartup(e);
 
@@ -26,26 +31,36 @@ public partial class App : Application {
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
-        ServiceObserverSettings settings = ServiceObserverSettings.FromArgs(e.Args);
+        //ServiceObserverSettings.GenerateTestDefaultConfigFile(CONFIG_FILE_NAME);
 
-        MainWindow = new MainWindowView {
-            DataContext = new MainWindowViewModel(settings)
+        if (e.Args.Length > 0) {
+            ServiceObserverSettings settings = ServiceObserverSettings.FromArgs(e.Args);
+            _viewModel = new MainWindowViewModel(settings);
+        }
+
+        if (File.Exists(CONFIG_FILE_NAME)) {
+            ServiceObserverSettings[] settingsSets = ServiceObserverSettings.FromConfigFile(CONFIG_FILE_NAME);
+            _viewModel = new MainWindowViewModel(settingsSets);
+        }
+
+        if (_viewModel is null) {
+            MessageBox.Show($"No settings; neither in args nor in {CONFIG_FILE_NAME}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        _view = new MainWindowView {
+            DataContext = _viewModel
         };
 
-        MainWindow.Loaded += async (sender, e) => {
-            MainWindowViewModel? vm = MainWindow.DataContext as MainWindowViewModel;
-            if (vm is not null) {
-                await vm.LoadAsync();
-            }
+        _view.Loaded += async (sender, e) => {
+            await _viewModel.LoadAsync();
         };
 
-        MainWindow.Closing += (sender, e) => {
-            MainWindowViewModel? vm = MainWindow.DataContext as MainWindowViewModel;
-            if (vm is not null) {
-                vm.Dispose();
-            }
+        _view.Closing += (sender, e) => {
+            _viewModel.Dispose();
         };
 
+        MainWindow = _view;
         MainWindow.Show();
     }
 

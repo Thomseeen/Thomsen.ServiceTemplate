@@ -34,4 +34,10 @@
         <Resource Include="Resources\Uninstall.png" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Services.xml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

@@ -20,6 +20,10 @@
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
+    <Style TargetType="ComboBox">
+        <Setter Property="Margin" Value="2,5" />
+    </Style>
+
     <Style TargetType="Separator">
         <Setter Property="Margin" Value="10" />
         <Setter Property="VerticalAlignment" Value="Center" />
