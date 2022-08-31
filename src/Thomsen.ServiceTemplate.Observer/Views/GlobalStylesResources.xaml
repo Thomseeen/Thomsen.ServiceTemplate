@@ -5,9 +5,49 @@
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
+    <Style x:Key="ServiceStatusImage" TargetType="Image">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding}" Value="NotInstalled">
+                <Setter Property="Source" Value="/Resources/StatusNotStarted.png" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding}" Value="Stopped">
+                <Setter Property="Source" Value="/Resources/StatusStopped.png" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding}" Value="StopPending">
+                <Setter Property="Source" Value="/Resources/StatusStoppedOutline.png" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding}" Value="StartPending">
+                <Setter Property="Source" Value="/Resources/StatusOKOutline.png" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding}" Value="Running">
+                <Setter Property="Source" Value="/Resources/StatusOK.png" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <Style TargetType="TextBlock">
         <Setter Property="Margin" Value="2" />
         <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="ServiceStatusTextBlock" TargetType="TextBlock">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding}" Value="NotInstalled">
+                <Setter Property="Text" Value="Not Installed" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding}" Value="Stopped">
+                <Setter Property="Text" Value="Stopped" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding}" Value="StopPending">
+                <Setter Property="Text" Value="Stop Pending" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding}" Value="StartPending">
+                <Setter Property="Text" Value="Start Pending" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding}" Value="Running">
+                <Setter Property="Text" Value="Running" />
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
 
     <Style TargetType="TextBox">

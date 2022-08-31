@@ -7,7 +7,6 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Views/NotifyIconResources.xaml" />
                 <ResourceDictionary Source="/Views/GlobalStylesResources.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

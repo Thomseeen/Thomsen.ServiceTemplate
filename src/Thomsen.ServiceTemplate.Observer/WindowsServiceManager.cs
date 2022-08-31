@@ -4,6 +4,7 @@ using System.IO;
 namespace Thomsen.ServiceTemplate.Observer;
 
 internal enum ServiceState {
+    NotInstalled,
     Stopped,
     StopPending,
     StartPending,
@@ -11,6 +12,8 @@ internal enum ServiceState {
 }
 
 internal static class WindowsServiceManager {
+    private const int ERROR_CODE_NOT_INSTALLED = 1060;
+
     public static async Task InstallServiceAsync(string serviceName, string serviceBinaryPath, bool autoStart = false) {
         // #TODO: Support service settings
         await RunScProcessAsync($"create \"{serviceName}\" binpath= \"{serviceBinaryPath}\"{(autoStart ? " start= auto" : "")}");
@@ -33,13 +36,23 @@ internal static class WindowsServiceManager {
     }
 
     private static async Task<ServiceState> RunScProcessAndParseStateFromStandardOutputAsync(string arguments) {
-        IAsyncEnumerable<string> result = RunProcessAndGetStandardOutputAsync("sc.exe", arguments);
+        Process process = await RunProcessAsync("sc.exe", arguments);
 
-        return await ParseStateAsync(result);
+        if (process.ExitCode == ERROR_CODE_NOT_INSTALLED) {
+            return ServiceState.NotInstalled;
+        }
+
+        IAsyncEnumerable<string> lines = GetStandardOutputAsync(process);
+
+        return await ParseStateAsync(lines);
     }
 
     private static async Task RunScProcessAsync(string arguments) {
-        _ = await RunProcessAsync("sc.exe", arguments);
+        Process process = await RunProcessAsync("sc.exe", arguments);
+
+        if (process.ExitCode != 0) {
+            throw new WindowsServiceManagerException(await GetStandardFullOutputAsync(process), process.ExitCode);
+        }
     }
 
     private static async Task<ServiceState> ParseStateAsync(IAsyncEnumerable<string> result) {
@@ -62,9 +75,7 @@ internal static class WindowsServiceManager {
         throw new InvalidOperationException("Parsing failed unexpected");
     }
 
-    private static async IAsyncEnumerable<string> RunProcessAndGetStandardOutputAsync(string fileName, string arguments) {
-        Process? process = await RunProcessAsync(fileName, arguments);
-
+    private static async IAsyncEnumerable<string> GetStandardOutputAsync(Process process) {
         using StreamReader reader = process.StandardOutput;
 
         string? line = await reader.ReadLineAsync();
@@ -72,6 +83,12 @@ internal static class WindowsServiceManager {
             yield return line;
             line = await reader.ReadLineAsync();
         }
+    }
+
+    private static async Task<string> GetStandardFullOutputAsync(Process process) {
+        using StreamReader reader = process.StandardOutput;
+
+        return await reader.ReadToEndAsync();
     }
 
     private static async Task<Process> RunProcessAsync(string fileName, string arguments) {
@@ -84,13 +101,6 @@ internal static class WindowsServiceManager {
         })!;
 
         await process.WaitForExitAsync();
-
-        if (process.ExitCode != 0) {
-            using StreamReader reader = process.StandardOutput;
-
-            // #TODO: Handle this differently
-            throw new WindowsServiceManagerException(await reader.ReadToEndAsync(), process.ExitCode);
-        }
 
         return process;
     }

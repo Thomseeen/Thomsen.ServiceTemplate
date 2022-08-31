@@ -10,9 +10,9 @@ namespace Thomsen.ServiceTemplate.Observer;
 public class WindowsServiceManagerException : Exception {
     private readonly int _errorCode;
 
+    public int ErrorCode => _errorCode;
+
     public WindowsServiceManagerException(string message, int errorCode) : base(message) {
         _errorCode = errorCode;
     }
-
-    public bool IsServiceNotInstalledError => _errorCode == 1060;
 }

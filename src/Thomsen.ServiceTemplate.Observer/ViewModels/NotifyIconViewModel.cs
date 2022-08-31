@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ internal class NotifyIconViewModel : BaseViewModel {
     private readonly ServiceObserverSettings[] _settings;
     private readonly System.Timers.Timer _timer;
 
-    private ServiceStateEntry[] _serviceStates;
+    private readonly ObservableCollection<ServiceStateEntry> _serviceStates;
 
     private ICommand? _showMainWindowCmd;
     private ICommand? _hideMainWindowCmd;
@@ -30,7 +31,7 @@ internal class NotifyIconViewModel : BaseViewModel {
     public ICommand ExitCmd => _exitCmd ??=
         new CommandHandler(param => Application.Current.Shutdown(), () => true);
 
-    public ServiceStateEntry[] ServiceStates { get => _serviceStates; set => SetProperty(ref _serviceStates, value); }
+    public ObservableCollection<ServiceStateEntry> ServiceStates => _serviceStates;
 
     public NotifyIconViewModel(ServiceObserverSettings[] settings) {
         _settings = settings;
@@ -40,34 +41,42 @@ internal class NotifyIconViewModel : BaseViewModel {
 
         _timer.Start();
 
-        _serviceStates = Array.Empty<ServiceStateEntry>();
+        _serviceStates = new ObservableCollection<ServiceStateEntry>();
+    }
+
+    public async Task LoadAsync() {
+        await InitServiceStatesAsync();
     }
 
     private async void Timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e) {
         _timer.Stop();
 
-        ServiceStates = await RefreshServiceStatesAsync(_settings);
+        await RefreshServiceStatesAsync();
 
         _timer.Start();
     }
 
-    private static async Task<ServiceStateEntry[]> RefreshServiceStatesAsync(ServiceObserverSettings[] settings) {
-        // #TODO: Don't always refresh full list
-        // #TODO: Handle some coloring/notify icons in the tray
-
-        List<ServiceStateEntry> services = new();
-
-        foreach (ServiceObserverSettings setting in settings) {
+    private async Task InitServiceStatesAsync() {
+        foreach (ServiceObserverSettings setting in _settings) {
             if (setting.ServiceName is null) {
                 continue;
             }
 
-            try {
-                ServiceState state = await WindowsServiceManager.GetServiceStateAsync(setting.ServiceName);
-                services.Add(new ServiceStateEntry() { Settings = setting, State = state });
-            } catch (WindowsServiceManagerException ex) when (ex.IsServiceNotInstalledError) { }
+            ServiceState state = await WindowsServiceManager.GetServiceStateAsync(setting.ServiceName);
+            ServiceStates.Add(new ServiceStateEntry() { Settings = setting, State = state });
         }
+    }
 
-        return services.ToArray();
+    private async Task RefreshServiceStatesAsync() {
+        foreach (ServiceStateEntry serviceState in ServiceStates) {
+            if (serviceState.Settings.ServiceName is null) {
+                continue;
+            }
+
+            ServiceState state = await WindowsServiceManager.GetServiceStateAsync(serviceState.Settings.ServiceName!);
+            if (serviceState.State != state) {
+                serviceState.State = state;
+            }
+        }
     }
 }

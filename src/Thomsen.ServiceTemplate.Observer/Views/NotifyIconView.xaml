@@ -1,0 +1,116 @@
+﻿<Window
+    x:Class="Thomsen.ServiceTemplate.Observer.Views.NotifyIconView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:e="clr-namespace:Thomsen.ServiceTemplate.Observer.Mvvm.Extensions"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:tb="http://www.hardcodet.net/taskbar"
+    xmlns:vm="clr-namespace:Thomsen.ServiceTemplate.Observer.ViewModels"
+    Title="NotifyIconView"
+    d:DataContext="{d:DesignInstance Type=vm:NotifyIconViewModel}"
+    mc:Ignorable="d">
+
+    <Window.Resources />
+
+    <Grid>
+        <tb:TaskbarIcon DoubleClickCommand="{Binding ShowMainWindowCmd}" IconSource="/Resources/StatusOK.ico">
+            <tb:TaskbarIcon.TrayToolTip>
+                <Border
+                    Background="White"
+                    BorderBrush="LightGray"
+                    BorderThickness="2"
+                    CornerRadius="4"
+                    Opacity="1">
+                    <ItemsControl ItemsSource="{Binding ServiceStates}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    BorderBrush="Gray"
+                                    BorderThickness="2"
+                                    CornerRadius="4">
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="20" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Image
+                                            Grid.Column="0"
+                                            DataContext="{Binding State}"
+                                            Style="{StaticResource ServiceStatusImage}" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Settings.ServiceName}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+            </tb:TaskbarIcon.TrayToolTip>
+
+            <tb:TaskbarIcon.TrayPopup>
+                <Border
+                    Padding="5"
+                    Background="White"
+                    BorderBrush="LightGray"
+                    BorderThickness="2"
+                    CornerRadius="4"
+                    Opacity="1">
+                    <StackPanel>
+                        <StackPanel.Resources>
+                            <e:BindingProxy x:Key="Proxy" Data="{Binding}" />
+                        </StackPanel.Resources>
+
+                        <TextBlock
+                            Margin="5"
+                            FontSize="14"
+                            FontWeight="Bold"
+                            Text="Show Observer for:" />
+
+                        <ItemsControl ItemsSource="{Binding ServiceStates}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button
+                                        HorizontalContentAlignment="Stretch"
+                                        BorderBrush="Gray"
+                                        BorderThickness="2"
+                                        Command="{Binding Data.ShowMainWindowCmd, Source={StaticResource Proxy}}"
+                                        CommandParameter="{Binding}">
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="20" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Image
+                                                Grid.Column="0"
+                                                DataContext="{Binding State}"
+                                                Style="{StaticResource ServiceStatusImage}" />
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                HorizontalAlignment="Left"
+                                                Text="{Binding Settings.ServiceName}" />
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </tb:TaskbarIcon.TrayPopup>
+
+            <tb:TaskbarIcon.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="{Binding ShowMainWindowCmd}" Header="_Show Observer" />
+                    <MenuItem Command="{Binding HideMainWindowCmd}" Header="_Hide Observer" />
+
+                    <Separator />
+
+                    <MenuItem Command="{Binding ExitCmd}" Header="_Exit" />
+                </ContextMenu>
+            </tb:TaskbarIcon.ContextMenu>
+        </tb:TaskbarIcon>
+    </Grid>
+</Window>

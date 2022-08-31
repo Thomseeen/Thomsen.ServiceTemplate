@@ -355,24 +355,23 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
             return;
         }
 
-        try {
-            ServiceState = await WindowsServiceManager.GetServiceStateAsync(LoadedSettings.ServiceName);
+        ServiceState = await WindowsServiceManager.GetServiceStateAsync(LoadedSettings.ServiceName);
 
-            switch (ServiceState) {
-                case ServiceState.Running:
-                case ServiceState.StartPending:
-                    IsServiceInstalled = true;
-                    IsServiceRunning = true;
-                    break;
-                case ServiceState.StopPending:
-                case ServiceState.Stopped:
-                    IsServiceInstalled = true;
-                    IsServiceRunning = false;
-                    break;
-            }
-        } catch (WindowsServiceManagerException ex) when (ex.IsServiceNotInstalledError) {
-            IsServiceInstalled = false;
-            IsServiceRunning = false;
+        switch (ServiceState) {
+            case ServiceState.Running:
+            case ServiceState.StartPending:
+                IsServiceInstalled = true;
+                IsServiceRunning = true;
+                break;
+            case ServiceState.StopPending:
+            case ServiceState.Stopped:
+                IsServiceInstalled = true;
+                IsServiceRunning = false;
+                break;
+            case ServiceState.NotInstalled:
+                IsServiceInstalled = false;
+                IsServiceRunning = false;
+                break;
         }
 
         // Force refresh on CanExecutes of all commands

@@ -28,7 +28,8 @@ public partial class ObserverApp : Application {
     private const string CONFIG_FILE_NAME = "Services.xml";
 
     private ServiceObserverSettings[]? _settings;
-    private TaskbarIcon? _notifyIcon;
+    private NotifyIconView? _notifyIconView;
+    private NotifyIconViewModel? _notifyIconViewModel;
 
     private MainWindowView? _mainWindowView;
     private MainWindowViewModel? _mainWindowViewModel;
@@ -57,6 +58,7 @@ public partial class ObserverApp : Application {
         MainWindow = _mainWindowView;
 
         MainWindow.Show();
+        MainWindow.Focus();
     }
 
     internal void CloseMainWindow() {
@@ -64,37 +66,45 @@ public partial class ObserverApp : Application {
         MainWindow = null;
     }
 
-    protected override void OnStartup(StartupEventArgs e) {
+    protected override async void OnStartup(StartupEventArgs e) {
         base.OnStartup(e);
 
         SetupUnhandeledExceptionHandler();
 
         //ServiceObserverSettings.GenerateTestDefaultConfigFile(CONFIG_FILE_NAME);
-
         _settings = LoadSettings(e);
 
-        _notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
-        _notifyIcon.DataContext = new NotifyIconViewModel(_settings);
-
+        _notifyIconViewModel = new NotifyIconViewModel(_settings);
         _mainWindowViewModel = new MainWindowViewModel(_settings);
+
+        await SetupNotifyIconAsync();
+
+        if (e.Args.Contains("-a") || e.Args.Contains("--admin")) {
+            // #TODO: Stat in Admin Mode
+        }
+
+        if (!(e.Args.Contains("-m") || e.Args.Contains("--minimized"))) {
+            SetupAndShowMainWindow();
+        }
+    }
+
+    private async Task SetupNotifyIconAsync() {
+        ArgumentNullException.ThrowIfNull(_notifyIconViewModel);
+
+        await _notifyIconViewModel.LoadAsync();
+
+        _notifyIconView = new NotifyIconView() {
+            DataContext = _notifyIconViewModel
+        };
     }
 
     protected override void OnExit(ExitEventArgs e) {
         _mainWindowViewModel?.Dispose();
-        _notifyIcon?.Dispose();
 
         base.OnExit(e);
     }
 
     private static ServiceObserverSettings[] LoadSettings(StartupEventArgs e) {
-        if (e.Args.Contains("-a") || e.Args.Contains("--admin")) {
-            // #TODO: Stat in Admin Mode
-        }
-
-        if (e.Args.Contains("-m") || e.Args.Contains("--minimized")) {
-            // #TODO: Start minimized to tray
-        }
-
         return File.Exists(CONFIG_FILE_NAME)
             ? ServiceObserverSettings.FromConfigFile(CONFIG_FILE_NAME)
             : new[] { ServiceObserverSettings.FromArgs(e.Args) };
