@@ -281,7 +281,7 @@ internal class MainWindowViewModel : BaseViewModel, IDisposable {
             ArgumentNullException.ThrowIfNull(LoadedSettings.ServiceName);
 
             string executableFullPath = Path.Combine(Directory.GetCurrentDirectory(), LoadedSettings.ServiceExecutablePath);
-            await WindowsServiceManager.InstallServiceAsync(LoadedSettings.ServiceName, executableFullPath);
+            await WindowsServiceManager.InstallServiceAsync(LoadedSettings.ServiceName, executableFullPath, true);
             await RefreshServiceStateAsync();
         });
     }

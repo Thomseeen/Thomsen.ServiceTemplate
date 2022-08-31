@@ -12,10 +12,12 @@
         <AssemblyName>Observer</AssemblyName>
         <BaseOutputPath>..\..\bin\Service\</BaseOutputPath>
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+        <ApplicationIcon>Resources\Icon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
         <None Remove="Resources\CleanData.png" />
+        <None Remove="Resources\Icon.ico" />
         <None Remove="Resources\Install.png" />
         <None Remove="Resources\Play.png" />
         <None Remove="Resources\Refresh.png" />
@@ -42,6 +44,7 @@
 
     <ItemGroup>
         <Resource Include="Resources\CleanData.png" />
+        <Resource Include="Resources\Icon.ico" />
         <Resource Include="Resources\Install.png" />
         <Resource Include="Resources\Play.png" />
         <Resource Include="Resources\Refresh.png" />

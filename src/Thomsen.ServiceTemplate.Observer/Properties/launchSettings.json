@@ -3,10 +3,6 @@
     "Thomsen.ServiceTemplate.Observer": {
       "commandName": "Project",
       "commandLineArgs": "-n \"Thomsen ServiceTemplate\" -e \"./Service.exe\" -l \"./Log/Service.log\""
-    },
-    "Profile 1": {
-      "commandName": "Project",
-      "commandLineArgs": "-l \"C:\\MahaPA\\MPAS\\Bin_Test\\Log\\MPASPorscheReportLib.log\""
     }
   }
 }

@@ -1,5 +1,6 @@
 ﻿using Hardcodet.Wpf.TaskbarNotification;
 
+using System.Diagnostics;
 using System.IO;
 using System.Runtime;
 using System.Windows;
@@ -71,6 +72,10 @@ public partial class ObserverApp : Application {
 
         SetupUnhandeledExceptionHandler();
 
+        if (e.Args.Contains("-a") || e.Args.Contains("--admin")) {
+            RestartAsAdmin(e.Args.Where(arg => arg != "-a" && arg != "--admin"));
+        }
+
         //ServiceObserverSettings.GenerateTestDefaultConfigFile(CONFIG_FILE_NAME);
         _settings = LoadSettings(e);
 
@@ -78,10 +83,6 @@ public partial class ObserverApp : Application {
         _mainWindowViewModel = new MainWindowViewModel(_settings);
 
         await SetupNotifyIconAsync();
-
-        if (e.Args.Contains("-a") || e.Args.Contains("--admin")) {
-            // #TODO: Stat in Admin Mode
-        }
 
         if (!(e.Args.Contains("-m") || e.Args.Contains("--minimized"))) {
             SetupAndShowMainWindow();
@@ -108,6 +109,18 @@ public partial class ObserverApp : Application {
         return File.Exists(CONFIG_FILE_NAME)
             ? ServiceObserverSettings.FromConfigFile(CONFIG_FILE_NAME)
             : new[] { ServiceObserverSettings.FromArgs(e.Args) };
+    }
+
+    private static void RestartAsAdmin(IEnumerable<string> args) {
+        Process.Start(new ProcessStartInfo() {
+            UseShellExecute = true,
+            WorkingDirectory = Environment.CurrentDirectory,
+            FileName = Environment.ProcessPath!,
+            Arguments = string.Join(" ", args),
+            Verb = "runas",
+        });
+
+        Environment.Exit(0);
     }
 
     private void SetupUnhandeledExceptionHandler() {

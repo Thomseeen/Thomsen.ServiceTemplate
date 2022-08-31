@@ -15,7 +15,7 @@ internal static class WindowsServiceManager {
     private const int ERROR_CODE_NOT_INSTALLED = 1060;
 
     public static async Task InstallServiceAsync(string serviceName, string serviceBinaryPath, bool autoStart = false) {
-        // #TODO: Support service settings
+        // #TODO: Support more service settings
         await RunScProcessAsync($"create \"{serviceName}\" binpath= \"{serviceBinaryPath}\"{(autoStart ? " start= auto" : "")}");
     }
 
